@@ -1,8 +1,11 @@
 package me.wh0_cares.hub;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -56,6 +59,7 @@ public class HubPlugin extends JavaPlugin implements Listener {
         }
     }
 
+	@SuppressWarnings("deprecation")
 	public void openHubInv(Player player) {
 		player.openInventory(HubInv);
         HubInv.clear();
@@ -66,11 +70,23 @@ public class HubPlugin extends JavaPlugin implements Listener {
         for(int x = 0 ; x < 45; x++){
             HubInv.setItem(x, glassItem);
         }
+        ItemStack placeItem = new ItemStack(Material.WOOL, 1, DyeColor.BLUE.getWoolData());
+        ItemMeta placeItemMeta = placeItem.getItemMeta();
+        placeItemMeta.setDisplayName("Reddit Place");
+        placeItem.setItemMeta(placeItemMeta);
+        HubInv.setItem(13, placeItem);
 	}
 	
 	@EventHandler
     public void onClickSlot(InventoryClickEvent event) {
-        event.setCancelled(true);
+		if(event.getView().getTopInventory().getName().equals("Server Menu")){
+        	if(event.getSlot() == 13){
+        		HumanEntity player = event.getWhoClicked();
+        		Location location = new Location(player.getWorld(), 56.417, 67, 78.841);
+                player.teleport(location);
+        	}
+        }
+        //event.setCancelled(true);
     }
 	
 }

@@ -65,9 +65,15 @@ public class HubPlugin extends JavaPlugin implements Listener {
         Location location = new Location(player.getWorld(), 0.5, 81, 0.5);
         player.teleport(location);
         player.getInventory().clear();
-        player.getInventory().setItem(4, new ItemStack(Material.COMPASS));
+        ItemStack compassItem = new ItemStack(Material.COMPASS);
+        ItemMeta compassItemMeta= compassItem.getItemMeta();
+        compassItemMeta.setDisplayName(ChatColor.AQUA + "Server Menu" + ChatColor.WHITE + " (Click)");
+        compassItem.setItemMeta(compassItemMeta);
+        player.getInventory().setItem(4, compassItem);
         player.updateInventory();
     }
+    
+    
     
 	@SuppressWarnings("deprecation")
 	@EventHandler
@@ -174,7 +180,11 @@ public class HubPlugin extends JavaPlugin implements Listener {
     					loc2 = null;
     				}
                 }else{
-    		        player.getInventory().setItem(8, new ItemStack(Material.DIAMOND_AXE));
+                	ItemStack axeItem = new ItemStack(Material.DIAMOND_AXE);
+                    ItemMeta axeItemMeta= axeItem.getItemMeta();
+                    axeItemMeta.setDisplayName(ChatColor.AQUA + "Portal Tool");
+                    axeItem.setItemMeta(axeItemMeta);
+    		        player.getInventory().setItem(8, axeItem);
                 }
 				return true;
 			}

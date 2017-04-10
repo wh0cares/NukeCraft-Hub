@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.HumanEntity;
@@ -26,8 +27,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class HubPlugin extends JavaPlugin implements Listener {
 	
     public static Inventory HubInv;
-    Location location1;
-	Location location2;
+	Location loc1, loc2;
 	
 	@Override
     public void onEnable() {
@@ -45,12 +45,12 @@ public class HubPlugin extends JavaPlugin implements Listener {
             if (!getDataFolder().exists()) {
                 getDataFolder().mkdirs();
             }
-            File file = new File(getDataFolder(), "portals.yml");
+            File file = new File(getDataFolder(), "config.yml");
             if (!file.exists()) {
-                getLogger().info("Creating portals config!");
+                getLogger().info("Creating config!");
                 saveDefaultConfig();
             } else {
-                getLogger().info("Loading portals config!");
+                getLogger().info("Loading config!");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -78,9 +78,9 @@ public class HubPlugin extends JavaPlugin implements Listener {
             	event.setCancelled(true);
         	}else if(player.getItemInHand().getTypeId() == Material.DIAMOND_AXE.getId() && player.isOp()){
         			if(event.getAction() == Action.LEFT_CLICK_BLOCK){
-        				location1 = event.getClickedBlock().getLocation();
+        				loc1 = event.getClickedBlock().getLocation();
         			}else if(event.getAction() == Action.RIGHT_CLICK_BLOCK){
-        				location2 = event.getClickedBlock().getLocation();
+        				loc2 = event.getClickedBlock().getLocation();
         			}
         		event.setCancelled(true);
         	}
@@ -94,22 +94,31 @@ public class HubPlugin extends JavaPlugin implements Listener {
     }
 	
 	@EventHandler
-    public void onInteract(PlayerMoveEvent event){
-    	Player player = event.getPlayer();
-    	if(location1 != null && location2 != null){
-    	    if(isPlayerInPortal(player.getLocation())){
-			    Bukkit.broadcastMessage(ChatColor.GREEN + "YES");
-    	    }else{
-			    Bukkit.broadcastMessage(ChatColor.RED + "NO");
-    	    }
-    	}
+    public void onMove(PlayerMoveEvent event){
+		if(getConfig().getConfigurationSection("hub.portals") != null){
+			
+			
+			Player player = event.getPlayer();
+	    
+			
+            for(String key : getConfig().getConfigurationSection("hub.portals").getKeys(false)){
+                Location l1 = new Location(getServer().getWorld(getConfig().getString("hub.portals."+key+".loc1.world")), getConfig().getInt("hub.portals."+key+".loc1.x"), getConfig().getInt("hub.portals."+key+".loc1.y"), getConfig().getInt("hub.portals."+key+".loc1.z"));
+                Location l2 = new Location(getServer().getWorld(getConfig().getString("hub.portals."+key+".loc2.world")), getConfig().getInt("hub.portals."+key+".loc2.x"), getConfig().getInt("hub.portals."+key+".loc2.y"), getConfig().getInt("hub.portals."+key+".loc2.z"));
+                if(Boolean.valueOf(isPlayerInPortal(player.getLocation(), l1, l2, key)[0])){
+//				    Bukkit.broadcastMessage(ChatColor.GREEN + "YES" + key);
+	    	    }else{
+//				    Bukkit.broadcastMessage(ChatColor.RED + "NO");
+	    	    }           
+            }
+        }
     }
 	
-	public boolean isPlayerInPortal(Location location) {
+	public String[] isPlayerInPortal(Location location, Location location1, Location location2, String portal) {
+		boolean inPortal = false;
         boolean x = location.getX() > Math.min(location1.getX(), location2.getX()) && location.getX() < Math.max(location1.getX(), location2.getX());
         boolean y = location.getY() > Math.min(location1.getY(), location2.getY()) && location.getY() < Math.max(location1.getY(), location2.getY());
         boolean z = location.getZ() > Math.min(location1.getZ(), location2.getZ()) && location.getZ() < Math.max(location1.getZ(), location2.getZ());
-        return x && y && z;
+        return new String[] {String.valueOf(x && y && z), portal};
     }
 	
 	@SuppressWarnings("deprecation")
@@ -151,12 +160,18 @@ public class HubPlugin extends JavaPlugin implements Listener {
 		if(player.isOp()){
 			if (cmd.getName().equalsIgnoreCase("portal")) {
 				if (args.length > 0){
-					if(location1 != null && location2 != null){
-    					getConfig().set("hub.portals."+args[0]+".loc1", location1.toString());
-    					getConfig().set("hub.portals."+args[0]+".loc2", location2.toString());
+					if(loc1 != null && loc2 != null){
+    					getConfig().set("hub.portals."+args[0]+".loc1.world", loc1.getWorld().getName());
+    					getConfig().set("hub.portals."+args[0]+".loc1.x", loc1.getBlockX());
+    					getConfig().set("hub.portals."+args[0]+".loc1.y", loc1.getBlockY());
+    					getConfig().set("hub.portals."+args[0]+".loc1.z", loc1.getBlockZ());
+    					getConfig().set("hub.portals."+args[0]+".loc2.world", loc2.getWorld());
+    					getConfig().set("hub.portals."+args[0]+".loc2.x", loc2.getBlockX());
+    					getConfig().set("hub.portals."+args[0]+".loc2.y", loc2.getBlockY());
+    					getConfig().set("hub.portals."+args[0]+".loc2.z", loc2.getBlockZ());
     					saveConfig();
-    					location1 = null;
-    					location2 = null;
+    					loc1 = null;
+    					loc2 = null;
     				}
                 }else{
     		        player.getInventory().setItem(8, new ItemStack(Material.DIAMOND_AXE));

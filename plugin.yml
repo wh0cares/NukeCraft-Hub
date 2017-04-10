@@ -3,3 +3,5 @@ main: me.wh0_cares.hub.HubPlugin
 load: STARTUP
 version: 1.0
 commands:
+   portal:
+      description: Give player portal tool.

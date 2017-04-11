@@ -7,7 +7,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.HumanEntity;
@@ -15,6 +14,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -73,7 +74,14 @@ public class HubPlugin extends JavaPlugin implements Listener {
         player.updateInventory();
     }
     
-    
+    @SuppressWarnings("deprecation")
+	@EventHandler
+    public void onBlockFromTo(BlockFromToEvent event) {
+        int id = event.getBlock().getTypeId();
+        if(id == 8 || id == 9) {
+            event.setCancelled(true);
+        }
+    }
     
 	@SuppressWarnings("deprecation")
 	@EventHandler
@@ -120,7 +128,6 @@ public class HubPlugin extends JavaPlugin implements Listener {
     }
 	
 	public String[] isPlayerInPortal(Location location, Location location1, Location location2, String portal) {
-		boolean inPortal = false;
         boolean x = location.getX() > Math.min(location1.getX(), location2.getX()) && location.getX() < Math.max(location1.getX(), location2.getX());
         boolean y = location.getY() > Math.min(location1.getY(), location2.getY()) && location.getY() < Math.max(location1.getY(), location2.getY());
         boolean z = location.getZ() > Math.min(location1.getZ(), location2.getZ()) && location.getZ() < Math.max(location1.getZ(), location2.getZ());
@@ -154,7 +161,9 @@ public class HubPlugin extends JavaPlugin implements Listener {
                 player.teleport(location);
         	}
         }
-        event.setCancelled(true);
+		if(!event.getWhoClicked().isOp() && event.getClick() != ClickType.CREATIVE){
+			event.setCancelled(true);
+		}
     }
 	
 	@Override
@@ -167,11 +176,11 @@ public class HubPlugin extends JavaPlugin implements Listener {
 			if (cmd.getName().equalsIgnoreCase("portal")) {
 				if (args.length > 0){
 					if(loc1 != null && loc2 != null){
-    					getConfig().set("hub.portals."+args[0]+".loc1.world", loc1.getWorld().getName());
+    					getConfig().set("hub.portals."+args[0]+".loc1.world", loc1.getWorld().getName().toString());
     					getConfig().set("hub.portals."+args[0]+".loc1.x", loc1.getBlockX());
     					getConfig().set("hub.portals."+args[0]+".loc1.y", loc1.getBlockY());
     					getConfig().set("hub.portals."+args[0]+".loc1.z", loc1.getBlockZ());
-    					getConfig().set("hub.portals."+args[0]+".loc2.world", loc2.getWorld());
+    					getConfig().set("hub.portals."+args[0]+".loc2.world", loc2.getWorld().getName().toString());
     					getConfig().set("hub.portals."+args[0]+".loc2.x", loc2.getBlockX());
     					getConfig().set("hub.portals."+args[0]+".loc2.y", loc2.getBlockY());
     					getConfig().set("hub.portals."+args[0]+".loc2.z", loc2.getBlockZ());

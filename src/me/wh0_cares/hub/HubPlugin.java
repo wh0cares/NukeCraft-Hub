@@ -15,6 +15,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -83,6 +85,16 @@ public class HubPlugin extends JavaPlugin implements Listener {
         }
     }
     
+    @EventHandler
+    public void onFoodLoss(FoodLevelChangeEvent event) {
+    	event.setCancelled(true);
+    }
+    
+    @EventHandler
+    public void onPlayerDamage(EntityDamageEvent event) {
+    	event.setCancelled(true);
+    }
+    
 	@SuppressWarnings("deprecation")
 	@EventHandler
     public void onInteract(PlayerInteractEvent event){
@@ -110,11 +122,7 @@ public class HubPlugin extends JavaPlugin implements Listener {
 	@EventHandler
     public void onMove(PlayerMoveEvent event){
 		if(getConfig().getConfigurationSection("hub.portals") != null){
-			
-			
 			Player player = event.getPlayer();
-	    
-			
             for(String key : getConfig().getConfigurationSection("hub.portals").getKeys(false)){
                 Location l1 = new Location(getServer().getWorld(getConfig().getString("hub.portals."+key+".loc1.world")), getConfig().getInt("hub.portals."+key+".loc1.x"), getConfig().getInt("hub.portals."+key+".loc1.y"), getConfig().getInt("hub.portals."+key+".loc1.z"));
                 Location l2 = new Location(getServer().getWorld(getConfig().getString("hub.portals."+key+".loc2.world")), getConfig().getInt("hub.portals."+key+".loc2.x"), getConfig().getInt("hub.portals."+key+".loc2.y"), getConfig().getInt("hub.portals."+key+".loc2.z"));

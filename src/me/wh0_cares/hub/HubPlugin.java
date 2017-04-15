@@ -1,6 +1,9 @@
 package me.wh0_cares.hub;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -36,6 +39,7 @@ public class HubPlugin extends JavaPlugin implements Listener {
     public void onEnable() {
 		HubInv = Bukkit.createInventory(null, 45, "Server Menu");
         getServer().getPluginManager().registerEvents(this, this);
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         createConfig();
     }
 	
@@ -93,7 +97,7 @@ public class HubPlugin extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerDamage(EntityDamageEvent event) {
     	event.setCancelled(true);
-    }
+    }    
     
 	@SuppressWarnings("deprecation")
 	@EventHandler
@@ -127,10 +131,16 @@ public class HubPlugin extends JavaPlugin implements Listener {
                 Location l1 = new Location(getServer().getWorld(getConfig().getString("hub.portals."+key+".loc1.world")), getConfig().getInt("hub.portals."+key+".loc1.x"), getConfig().getInt("hub.portals."+key+".loc1.y"), getConfig().getInt("hub.portals."+key+".loc1.z"));
                 Location l2 = new Location(getServer().getWorld(getConfig().getString("hub.portals."+key+".loc2.world")), getConfig().getInt("hub.portals."+key+".loc2.x"), getConfig().getInt("hub.portals."+key+".loc2.y"), getConfig().getInt("hub.portals."+key+".loc2.z"));
                 if(Boolean.valueOf(isPlayerInPortal(player.getLocation(), l1, l2, key)[0])){
-//				    Bukkit.broadcastMessage(ChatColor.GREEN + "YES" + key);
-	    	    }else{
-//				    Bukkit.broadcastMessage(ChatColor.RED + "NO");
-	    	    }           
+                	ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            	    DataOutputStream out = new DataOutputStream(stream);
+            	    try {
+            	    	out.writeUTF("Connect");
+            	    	out.writeUTF(key);
+            			player.sendPluginMessage(this, "BungeeCord", stream.toByteArray());
+            		} catch (IOException e) {
+            			e.printStackTrace();
+            		}
+	    	    }          
             }
         }
     }

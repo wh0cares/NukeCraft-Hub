@@ -22,6 +22,7 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -252,5 +253,12 @@ public class HubPlugin extends JavaPlugin implements Listener {
 		}
 		return false;
 	}
-
+	
+	@EventHandler
+	public void onPlayerDrop(PlayerDropItemEvent event) {
+		event.getItemDrop().remove();
+		ItemStack item = event.getItemDrop().getItemStack();
+		event.getPlayer().getInventory().removeItem(item);
+		event.getPlayer().getInventory().addItem(item);
+	}
 }
